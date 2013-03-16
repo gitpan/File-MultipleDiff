@@ -1,7 +1,7 @@
 --- #YAML:1.0
 name:               File-MultipleDiff
-version:            0.02
-abstract:           ~
+version:            0.03
+abstract:           Compare multiple files
 author:
     - Mart E. Rivilis <rivilism@cpan.org>
 license:            Artistic_2_0

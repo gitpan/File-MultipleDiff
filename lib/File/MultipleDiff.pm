@@ -4,23 +4,12 @@ use 5.006;
 use strict;
 use warnings FATAL => 'all';
 
-=head1 NAME
-
- File::MultipleDiff - Compare multiple files
-
-=head1 VERSION
-
- Version 0.02
-
-=cut
-
 require Exporter;
 our @ISA = qw(Exporter);
 our @EXPORT = qw(multiple_file_diff);
 
 use Carp ;
-my $debug = 0;
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 use Algorithm::Diff "sdiff";
 use Tie::File  ;
@@ -84,7 +73,6 @@ sub multiple_file_diff
    unless ((defined $file_pattern) && $file_pattern) { $file_pattern = '.'; }
 
    unless ((defined $colour) && $colour) { $colour = 'b'; }
-#  print "DEBUG: colour = $colour\n";
    if ($colour !~ /^[bc]$/) { croak "ERROR: colour parameter must be either 'c' or 'b' or empty"; }
    if ($colour eq 'b') { $colour = ''; }
 
@@ -180,149 +168,159 @@ sub multiple_file_diff
    }
 }  # end of "sub multiple_file_diff"
 
+=head1 NAME
+
+File::MultipleDiff - Compare multiple files
+
 =head1 SYNOPSIS
 
- use File::MultipleDiff;
- multiple_file_diff ( <input_directory>
-                    , <file_names_pattern>
-                    , 'c|b'
-                    , <max_digits_amount> );
+   use File::MultipleDiff;
+   multiple_file_diff ( <input_directory>
+                      , <file_names_pattern>
+                      , 'c|b'            # c - colour, b - black/white
+                      , <max_digits_amount> );
 
 =head1 DESCRIPTION
 
- Compares many files with each other.
- Writes comparison results into a symmetric matrix having amount of
- rows and amount of columns equal with the amount of compared files.
- Every matrix element contains amount of differences between
- corresponding pair of compared files.
+Compares many files with each other.
+Writes comparison results into a symmetric matrix having amount of
+rows and amount of columns equal with the amount of compared files.
+Every matrix element contains amount of differences between
+corresponding pair of compared files.
 
- If a directory contains file1, ... file5 and only these files, then
- multiple_file_diff ('directory');   produces following output:
+If a directory "inp_directory" contains file "file1", ... "file5" and only these
+files, then the command
 
- ---------------------------
-       |  f   f   f   f   f 
-       |  i   i   i   i   i 
-       |  l   l   l   l   l 
-       |  e   e   e   e   e 
-       |  1   2   3   4   5 
- ---------------------------
- file1 |  0   1   2   0   3  
- file2 |  -   0   3   1   4  
- file3 |  -   -   0   2   5  
- file4 |  -   -   -   0   3  
- file5 |  -   -   -   -   0  
+   multiple_file_diff ('inp_directory');
+
+produces following output matrix:
+
+   ---------------------------
+         |  f   f   f   f   f 
+         |  i   i   i   i   i 
+         |  l   l   l   l   l 
+         |  e   e   e   e   e 
+         |  1   2   3   4   5 
+   ---------------------------
+   file1 |  0   1   2   0   3  
+   file2 |  -   0   3   1   4  
+   file3 |  -   -   0   2   5  
+   file4 |  -   -   -   0   3  
+   file5 |  -   -   -   -   0  
  
- In the example above file1 is identical with file4,
-                      file2 has 4 differences from file5.
- Amount of different lines in files is meant as an amount of differences.
+Amount of different lines in every pair of files is meant as an amount
+of differences and and these amounts are printed as elements of the matrix.
 
- Comparison of 2 objects is a commutative operation, that is its result does not depend
- on sequence of compared objects.
- That means, if A is equal with B, than B is equal with A,
-             if A is not equal with B, that B is not equal with A.
+That means, that  file1 is identical with file4,
+                  file2 has 4 differences from file5.
 
- This obstacle forces a comparison matrix to be a symmetric one.
- The entries of a symmetric matrix are symmetric with respect to its main diagonal.
- See   http://en.wikipedia.org/wiki/Symmetric_matrix
+Comparison of 2 objects is a commutative operation:
+its result does not depend on sequence of compared objects.
+That means, if A is equal with B, than B is equal with A,
+            if A is not equal with B, that B is not equal with A.
 
- For performance's sake a half of the matrix will be filled in.
+This obstacle forces a comparison matrix to be a symmetric one.
+The entries of a symmetric matrix are symmetric with respect to its main diagonal.
+See   http://en.wikipedia.org/wiki/Symmetric_matrix
 
- Example:
- fileA        fileB
- ------------------
- line1        line1
- line2        line3
- line3        line4
- line4        line5
+For performance's sake a half of the matrix will be filled in.
 
- Perl module Algorithm::Diff is used for file comparison.
- This module minimizes amount of differences and for the example above
- it finds 2 (not 3) differences between these files.
+Example:
 
- fileA        fileB
- ------------------
- line1        line1
- line2                 1st difference
- line3        line3
- line4        line4
-              line5    2nd difference
+   fileA        fileB
+   -----        -----
+   line1        line1
+   line2        line3
+   line3        line4
+   line4        line5
 
- A "secret" of this minimization is the longest common subsequence (LCS) method,
- that is implemented in that module.
+Perl module Algorithm::Diff is used for file comparison.
+This module minimizes amount of differences and for the example above
+it detects 2 (not 3) differences between these files:
+
+   fileA        fileB
+   -----        -----
+   line1        line1
+   line2                 1st difference
+   line3        line3
+   line4        line4
+                line5    2nd difference
+
+A basis of this minimization is the longest common subsequence (LCS) method,
+that is implemented in that module.
 
 =head2 Remark for more curious
 
- Have you noticed a fraud above?
- Amount of differences between 2 files is strictly speaking not commutative,
- if Algorithm::Diff is used.
- Nevertheless I've decided to create a triangular matrix, as if a full matrix
- were symmetric matrix indeed.
- This is acceptable for implementation of this module as a "chaosmeter".
- Assume, you expectation is that some kind of configuration files on many
- computers must be identical and you want to check this.
- Hopefully most of them might be identical, but some of them are different.
- Zeroes in the matrix mean identical files and identity check is commutative
- operation. Non-zeroes matrix elements mean divergence of file contents and
- a level of chaos. The larger matrix element, the larger distance between 2 files.
- A known from mathematics metric or distance function is similar with a conversion,
- made by Algorithm::Diff.
- Absent commutativity is known as quasimetric.
- Quote from http://en.wikipedia.org/wiki/Metric_(mathematics)#Quasimetrics
- "Quasimetrics are common in real life. ...
- Example is a taxicab geometry topology having one-way streets, where a path from
- point A to point B comprises a different set of streets than a path from B to A."
+Have you noticed a fraud above?
+Amount of differences between 2 files is strictly speaking not commutative,
+if Algorithm::Diff is used.
+Nevertheless I've decided to create a triangular matrix, as if a full matrix
+were symmetric matrix indeed.
+This is acceptable for implementation of this module as a "chaosmeter".
+Assume, you expectation is that some kind of configuration files on many
+computers must be identical and you want to check this.
+Hopefully most of them might be identical, but some of them are different.
+Zeroes in the matrix mean identical files and identity check is commutative
+operation. Non-zeroes matrix elements mean divergence of file contents and
+a level of chaos. The larger matrix element, the larger distance between 2 files.
+A known from mathematics metric or distance function is similar with a conversion,
+made by Algorithm::Diff.
+Absent commutativity is known as quasimetric.
+Quote from http://en.wikipedia.org/wiki/Metric_(mathematics)#Quasimetrics
+"Quasimetrics are common in real life. ...
+Example is a taxicab geometry topology having one-way streets, where a path from
+point A to point B comprises a different set of streets than a path from B to A."
 
 =head1 EXPORT
 
- multiple_file_diff
+   multiple_file_diff
 
 =head1 SUBROUTINES
 
 =head2 multiple_file_diff
 
- multiple_file_diff (
-     <input_directory>        # Directory, that contains all compared files;
+   multiple_file_diff (
+       <input_directory>      # Directory, that contains all compared files;
 
-   , <file_name_pattern>      # Regular expression, optional parameter,
+     , <file_name_pattern>    # Regular expression, optional parameter,
                               # default value - all files in the input directory;
                              
-   , 'c|b'                    # Refers to output of comparison, optional.
+     , 'c|b'                  # Refers to output of comparison, optional.
                               # c - colour, b - black/white output (b is default).
                               # Prerequisite for usage of colour mode is that
                               # terminal supports ANSI escape sequences.
                               # More about is here
                               # http://search.cpan.org/~rra/Term-ANSIColor-4.02/ANSIColor.pm ;
 
-   , <max_digits_amount> );   # Max amount of digits in amounts of differences.
+     , <max_digits_amount> ); # Max amount of digits in amounts of differences.
                               # Optional parameter, default value is 2.
                               # This parameter is self expandable and supports
                               # amount of differences until 9999.
                               # You can ignore the last parameter.
 
- Only 1st parameter of this subroutine must be specified.
- Undefined or empty further parameters will be replaces by default values.
-
-=cut
+Only 1st parameter of this subroutine must be specified.
+Undefined or empty further parameters will be replaces by default values.
 
 =head1 AUTHOR
 
-Mart E. Rivilis, <rivilism@cpan.org>
+Mart E. Rivilis,  rivilism@cpan.org 
 
 =head1 BUGS
 
- Please report any bugs or feature requests to bug-file-multiplediff@rt.cpan.org,
- or through the web interface at
- http://rt.cpan.org/NoAuth/ReportBug.html?Queue=File-MultipleDiff.
- I will be notified, and then you'll automatically be notified of progress on your
- bug as I make changes.
+Please report any bugs or feature requests to bug-file-multiplediff@rt.cpan.org,
+or through the web interface at
+http://rt.cpan.org/NoAuth/ReportBug.html?Queue=File-MultipleDiff.
+I will be notified, and then you'll automatically be notified of progress on your
+bug as I make changes.
 
 
 =head1 SUPPORT
 
- You can find documentation for this module with the perldoc command.
-    perldoc File::MultipleDiff
+You can find documentation for this module with the perldoc command.
 
- You can also look for information at:
+   perldoc File::MultipleDiff
+
+You can also look for information at:
 
 =over 4
 
@@ -344,12 +342,11 @@ Mart E. Rivilis, <rivilism@cpan.org>
 
 =back
 
-
 =head1 LICENSE AND COPYRIGHT
 
- Copyright 2013 Mart E. Rivilis.
- This program is free software; you can redistribute it and/or modify it
- under the terms of the the Artistic License (2.0).
+Copyright 2013 Mart E. Rivilis.
+This program is free software; you can redistribute it and/or modify it
+under the terms of the the Artistic License (2.0).
 
 =cut
 
