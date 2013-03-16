@@ -10,7 +10,7 @@ use warnings FATAL => 'all';
 
 =head1 VERSION
 
- Version 0.01
+ Version 0.02
 
 =cut
 
@@ -20,7 +20,7 @@ our @EXPORT = qw(multiple_file_diff);
 
 use Carp ;
 my $debug = 0;
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 use Algorithm::Diff "sdiff";
 use Tie::File  ;
@@ -183,14 +183,14 @@ sub multiple_file_diff
 =head1 SYNOPSIS
 
  use File::MultipleDiff;
- multiple_file_diff ( <input_dir>
+ multiple_file_diff ( <input_directory>
                     , <file_names_pattern>
                     , 'c|b'
                     , <max_digits_amount> );
 
 =head1 DESCRIPTION
 
- Compares many files with one another.
+ Compares many files with each other.
  Writes comparison results into a symmetric matrix having amount of
  rows and amount of columns equal with the amount of compared files.
  Every matrix element contains amount of differences between
@@ -216,14 +216,13 @@ sub multiple_file_diff
                       file2 has 4 differences from file5.
  Amount of different lines in files is meant as an amount of differences.
 
- Comparison of 2 objects is a commutative operation, i.e its result does not depend
+ Comparison of 2 objects is a commutative operation, that is its result does not depend
  on sequence of compared objects.
  That means, if A is equal with B, than B is equal with A,
              if A is not equal with B, that B is not equal with A.
- (I regret to mention this primitive mathematic thing.)
 
  This obstacle forces a comparison matrix to be a symmetric one.
- The entries of a symmetric matrix are symmetric with respect to the main diagonal.
+ The entries of a symmetric matrix are symmetric with respect to its main diagonal.
  See   http://en.wikipedia.org/wiki/Symmetric_matrix
 
  For performance's sake a half of the matrix will be filled in.
@@ -254,19 +253,19 @@ sub multiple_file_diff
 =head2 Remark for more curious
 
  Have you noticed a fraud above?
- Amount of differences between 2 files is stronly speaking not commutative,
+ Amount of differences between 2 files is strictly speaking not commutative,
  if Algorithm::Diff is used.
  Nevertheless I've decided to create a triangular matrix, as if a full matrix
  were symmetric matrix indeed.
- This is acceptabel for implementation of this module as a "chaosmeter".
+ This is acceptable for implementation of this module as a "chaosmeter".
  Assume, you expectation is that some kind of configuration files on many
  computers must be identical and you want to check this.
  Hopefully most of them might be identical, but some of them are different.
  Zeroes in the matrix mean identical files and identity check is commutative
  operation. Non-zeroes matrix elements mean divergence of file contents and
  a level of chaos. The larger matrix element, the larger distance between 2 files.
- A known from mathematics metric or distance function is similar with a convertion,
- made by Algorthim::Diff.
+ A known from mathematics metric or distance function is similar with a conversion,
+ made by Algorithm::Diff.
  Absent commutativity is known as quasimetric.
  Quote from http://en.wikipedia.org/wiki/Metric_(mathematics)#Quasimetrics
  "Quasimetrics are common in real life. ...
@@ -300,7 +299,7 @@ sub multiple_file_diff
                               # amount of differences until 9999.
                               # You can ignore the last parameter.
 
- Only 1st parameter of this subroutione must be specified.
+ Only 1st parameter of this subroutine must be specified.
  Undefined or empty further parameters will be replaces by default values.
 
 =cut
@@ -311,9 +310,9 @@ Mart E. Rivilis, <rivilism@cpan.org>
 
 =head1 BUGS
 
- Please report any bugs or feature requests to <bug-file-multiplediff at rt.cpan.org>,
+ Please report any bugs or feature requests to bug-file-multiplediff@rt.cpan.org,
  or through the web interface at
- <http://rt.cpan.org/NoAuth/ReportBug.html?Queue=File-MultipleDiff>.
+ http://rt.cpan.org/NoAuth/ReportBug.html?Queue=File-MultipleDiff.
  I will be notified, and then you'll automatically be notified of progress on your
  bug as I make changes.
 
@@ -329,19 +328,19 @@ Mart E. Rivilis, <rivilism@cpan.org>
 
 =item * RT: CPAN's request tracker (report bugs here)
 
- <http://rt.cpan.org/NoAuth/Bugs.html?Dist=File-MultipleDiff>
+ http://rt.cpan.org/NoAuth/Bugs.html?Dist=File-MultipleDiff
 
 =item * AnnoCPAN: Annotated CPAN documentation
 
- <http://annocpan.org/dist/File-MultipleDiff>
+ http://annocpan.org/dist/File-MultipleDiff
 
 =item * CPAN Ratings
 
- <http://cpanratings.perl.org/d/File-MultipleDiff>
+ http://cpanratings.perl.org/d/File-MultipleDiff
 
 =item * Search CPAN
 
- <http://search.cpan.org/dist/File-MultipleDiff/>
+ http://search.cpan.org/dist/File-MultipleDiff/
 
 =back
 
