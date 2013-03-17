@@ -9,7 +9,7 @@ our @ISA = qw(Exporter);
 our @EXPORT = qw(multiple_file_diff);
 
 use Carp ;
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 use Algorithm::Diff "sdiff";
 use Tie::File  ;
