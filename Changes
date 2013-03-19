@@ -11,3 +11,6 @@ Revision history for File-MultipleDiff
 
 0.04    2013/time
         Enhanced Makefile.PL: dependencies added
+
+0.05    2013/time
+        Description essentially improved

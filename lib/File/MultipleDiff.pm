@@ -9,7 +9,7 @@ our @ISA = qw(Exporter);
 our @EXPORT = qw(multiple_file_diff);
 
 use Carp ;
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 use Algorithm::Diff "sdiff";
 use Tie::File  ;
@@ -167,6 +167,9 @@ sub multiple_file_diff
       print  "\n";
    }
 }  # end of "sub multiple_file_diff"
+1;
+
+__END__
 
 =head1 NAME
 
@@ -183,12 +186,11 @@ File::MultipleDiff - Compare multiple files
 =head1 DESCRIPTION
 
 Compares many files with each other.
-Writes comparison results into a symmetric matrix having amount of
-rows and amount of columns equal with the amount of compared files.
-Every matrix element contains amount of differences between
-corresponding pair of compared files.
+Writes comparison results into a symmetric matrix with one row and column
+per compared file. Each matrix element reports the number of differences
+between the files corresponding to the column and row.
 
-If a directory "inp_directory" contains file "file1", ... "file5" and only these
+If a directory "inp_directory" contains files "file1", ... "file5" and only these
 files, then the command
 
    multiple_file_diff ('inp_directory');
@@ -208,20 +210,15 @@ produces following output matrix:
    file4 |  -   -   -   0   3  
    file5 |  -   -   -   -   0  
  
-Amount of different lines in every pair of files is meant as an amount
-of differences and and these amounts are printed as elements of the matrix.
-
-That means, that  file1 is identical with file4,
-                  file2 has 4 differences from file5.
+The entries of the matrix report the number of lines which differ between 
+the two files. Thus, file1 and file4 are identical, while file2 and file5
+have 4 differences.
 
 Comparison of 2 objects is a commutative operation:
-its result does not depend on sequence of compared objects.
-That means, if A is equal with B, than B is equal with A,
-            if A is not equal with B, that B is not equal with A.
-
-This obstacle forces a comparison matrix to be a symmetric one.
-The entries of a symmetric matrix are symmetric with respect to its main diagonal.
-See   http://en.wikipedia.org/wiki/Symmetric_matrix
+its result does not depend on the order of operands.
+C<That means, if A is equal to B, than B is equal to A,
+            if A is not equal to B, that B is not equal to A.
+Thus the matrix is symmetric. See http://en.wikipedia.org/wiki/Symmetric_matrix.>
 
 For performance's sake a half of the matrix will be filled in.
 
@@ -251,18 +248,17 @@ that is implemented in that module.
 
 =head2 Remark for more curious
 
-Have you noticed a fraud above?
-Amount of differences between 2 files is strictly speaking not commutative,
-if Algorithm::Diff is used.
-Nevertheless I've decided to create a triangular matrix, as if a full matrix
-were symmetric matrix indeed.
-This is acceptable for implementation of this module as a "chaosmeter".
-Assume, you expectation is that some kind of configuration files on many
-computers must be identical and you want to check this.
-Hopefully most of them might be identical, but some of them are different.
-Zeroes in the matrix mean identical files and identity check is commutative
-operation. Non-zeroes matrix elements mean divergence of file contents and
-a level of chaos. The larger matrix element, the larger distance between 2 files.
+Have you noticed the catch above? The number of differences between two files
+is strictly speaking not commutative when Algorithm::Diff is used. Nevertheless
+I've decided to create a triangular matrix, as if a full matrix were indeed
+a symmetric matrix. This is acceptable for the implementation of this module
+as a "chaosmeter". Assume that you expect some configuration files on many
+computers to be identical and you want to check this. Hopefully most of them
+will be identical, but some of them are different. Zeroes in the matrix mean
+identical files and the identity check is indeed a commutative operation.
+Non-zeroes matrix elements mean the file contents differ and a level of chaos.
+The larger the matrix element, the larger distance between two files. 
+
 A known from mathematics metric or distance function is similar with a conversion,
 made by Algorithm::Diff.
 Absent commutativity is known as quasimetric.
@@ -349,5 +345,3 @@ This program is free software; you can redistribute it and/or modify it
 under the terms of the the Artistic License (2.0).
 
 =cut
-
-1; # End of File::MultipleDiff
