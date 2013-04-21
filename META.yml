@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name:               File-MultipleDiff
-version:            0.05
+version:            0.06
 abstract:           Compare multiple files
 author:
     - Mart E. Rivilis <rivilism@cpan.org>
@@ -13,6 +13,7 @@ build_requires:
 requires:
     Algorithm::Diff:  1.19
     perl:             5.006
+    Tie::File:        0.97
 no_index:
     directory:
         - t

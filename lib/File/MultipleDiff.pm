@@ -9,10 +9,10 @@ our @ISA = qw(Exporter);
 our @EXPORT = qw(multiple_file_diff);
 
 use Carp ;
-our $VERSION = '0.05';
+our $VERSION = '0.06';
 
 use Algorithm::Diff "sdiff";
-use Tie::File  ;
+use Tie::File ;
 use Term::ANSIColor;
 use Cwd;
 

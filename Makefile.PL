@@ -19,6 +19,7 @@ WriteMakefile(
     },
     PREREQ_PM => {
         'Algorithm::Diff'  => 1.19,
+        'Tie::File'        => 0.97,
     },
     dist  => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean => { FILES => 'File-MultipleDiff-*' },
